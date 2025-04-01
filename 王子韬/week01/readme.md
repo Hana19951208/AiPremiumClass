@@ -1,1 +1,0 @@
-作业1和2都保存在nunpy和pytorch代码中。作业3微分求导和梯度下降的理论知识保存在gradient_descent_baseic中
