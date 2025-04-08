@@ -57,7 +57,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class RNNModel(nn.Module):
-    def __init__(self, input_size=1, hidden_size=50, num_layers=1, output_size=5):
+    def __init__(self, input_size=1, hidden_size=128, num_layers=2, output_size=5):
         super().__init__()
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -65,7 +65,11 @@ class RNNModel(nn.Module):
             num_layers=num_layers,
             batch_first=True
         )
-        self.fc = nn.Linear(hidden_size, output_size)
+        self.fc = nn.Sequential(
+            nn.Linear(hidden_size, 64),
+            nn.ReLU(),
+            nn.Linear(64, output_size)
+        )
 
     def forward(self, x):
         out, _ = self.lstm(x)
