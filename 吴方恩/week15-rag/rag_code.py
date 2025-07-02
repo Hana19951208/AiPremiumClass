@@ -7,7 +7,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
 from langchain import hub
 
@@ -26,14 +25,10 @@ if __name__ == '__main__':
         api_key=os.environ['OPENAI_API_KEY'],
         base_url=os.environ['BASE_URL']
     )
-    # LLM 模型
-    # llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=os.environ['GOOGLE_API_KEY'])
-    # 嵌入模型
-    # embedding_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=os.environ['GOOGLE_API_KEY']) # 或者其他合适的 Google 嵌入模型
 
     if not os.path.exists('local_save'):
         # 加载网页中文本内容，转换langchain处理的Document
-        loader = PDFMinerLoader(file_path='/Users/Hana/Downloads/The Era of Experience Paper.pdf')
+        loader = PDFMinerLoader(file_path='.\吴方恩\week15-rag\The Era of Experience Paper.pdf')
         docs = loader.load()
 
         # TextSplitter实现加载后Document分割
