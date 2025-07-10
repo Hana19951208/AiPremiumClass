@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import jieba
 
 def get_batch(split):
     # 选择训练或验证数据集
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     # 模型训练数据集
     block_size = 8
     batch_size = 32
-    max_iter = 1000
+    max_iter = 5000
     learn_rate = 1e-3
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     n_embd = 32
@@ -104,20 +105,36 @@ if __name__ == '__main__':
 
     file_path = os.path.join(os.path.dirname(__file__), 'input.txt')
     
-    with open(file_path) as f:
+    with open(file_path, encoding='utf-8') as f:
         text = f.read()
 
-    # 字典、编码器(函数)、解码器(函数)
-    chars = sorted(list(set(text)))
-    vocab_size = len(chars)
-    stoi = {ch:i for i,ch in enumerate(chars)}  #str_to_index
-    itos = {i:ch for i,ch in enumerate(chars)}  #index_to_str
+    # --- 使用 jieba 进行分词并构建词汇表 ---
+    print("正在使用jieba进行分词...")
+    # 使用jieba.lcut直接返回一个词语列表
+    words = jieba.lcut(text) 
+    print(f"分词完成，总词数: {len(words)}")
 
-    encode = lambda s: [stoi[c] for c in s]
+    # 构建词汇表
+    vocab = sorted(list(set(words)))
+    # 新增：加入一个未知词标记
+    if '<UNK>' not in vocab:
+        vocab.append('<UNK>')
+    vocab_size = len(vocab)
+    print(f"词汇表大小: {vocab_size}")
+
+    # 创建词语到索引、索引到词语的映射
+    stoi = {word:i for i,word in enumerate(vocab)}
+    itos = {i:word for i,word in enumerate(vocab)}
+
+    # 获取<UNK>标记的索引
+    UNK_IDX = stoi['<UNK>']
+
+    # 更新encode和decode函数
+    encode = lambda s: [stoi.get(word, UNK_IDX) for word in jieba.lcut(s)]
     decode = lambda l: ''.join([itos[i] for i in l])
 
-    # 文本转换token index
-    data = torch.tensor(encode(text), dtype=torch.long)
+    # --- 文本转换token index ---
+    data = torch.tensor([stoi[w] for w in words], dtype=torch.long)
 
     # 拆分数据集
     n = int(len(data) * .7)
